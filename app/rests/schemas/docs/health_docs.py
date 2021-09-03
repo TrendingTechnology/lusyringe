@@ -1,6 +1,12 @@
 from pydantic.fields import Field
 
 
-health_openapi = {
-    'ping': (str, Field(..., example='Pong =D'))
-}
+from syringe.data import Prescription
+
+health_openapi = [
+    Prescription(
+        field='ping',
+        type=str,
+        doc=Field(..., example='Pong')
+    )
+]
