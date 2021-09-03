@@ -1,6 +1,6 @@
-from pydantic.fields import FieldInfo
+from pydantic.fields import Field
 
 
 health_openapi = {
-    'ping': FieldInfo(..., example='Ponguinho =)')
+    'ping': (str, Field(..., example='Pong =D'))
 }
