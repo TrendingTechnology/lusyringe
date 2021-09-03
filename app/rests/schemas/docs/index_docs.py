@@ -1,6 +1,10 @@
-from pydantic.fields import FieldInfo
+from pydantic.fields import Field
 
+from datetime import datetime, timezone
+
+current_date = datetime.now(timezone.utc)
 
 index_openapi = {
-    'message': FieldInfo(..., example='Hey Yo! Sean Kingston')
+    'message': Field(..., example='Hey Yo! Sean Kingston'),
+    'timestamp': Field(..., example=current_date)
 }
