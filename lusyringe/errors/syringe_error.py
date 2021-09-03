@@ -1,7 +1,7 @@
 from typing import Type
 
 
-class SyringeError:
+class LuSyringeError:
     def attribute_not_implemented(class_name: str, field: str, type_: Type):
         return NotImplementedError(
             f"Documentation for {field} with type {type_} was found,"

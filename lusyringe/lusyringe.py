@@ -6,7 +6,7 @@ from .checkers import DefinitionChecker
 
 from .data import Prescription
 
-from .errors import SyringeError
+from .errors import LuSyringeError
 
 
 class __Meta__(type):
@@ -60,7 +60,7 @@ class __Meta__(type):
             )
 
             if annotation_exists and not has_same_type:
-                raise SyringeError.illegal_type_attribution(
+                raise LuSyringeError.illegal_type_attribution(
                     prescription.field,
                     prescription.type
                 )
@@ -84,7 +84,7 @@ class __Meta__(type):
             field_not_implemented = not defined_in_attributes and not defined_in_bases
 
             if field_not_implemented:
-                raise SyringeError.attribute_not_implemented(
+                raise LuSyringeError.attribute_not_implemented(
                     class_name,
                     prescription.field,
                     prescription.type
@@ -93,7 +93,7 @@ class __Meta__(type):
             __Meta__.__inject__(attributes, prescription)
 
 
-def syringe(doc_spec: List[Prescription], strict=True):
+def lusyringe(doc_spec: List[Prescription], strict=True):
     class MetaClass(__Meta__):
         pass
 

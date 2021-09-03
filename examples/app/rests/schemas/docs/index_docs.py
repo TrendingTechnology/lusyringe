@@ -1,4 +1,5 @@
-from syringe.data import Prescription
+from lusyringe import Prescription
+
 from pydantic.fields import Field
 
 from datetime import datetime, timezone

@@ -1,7 +1,7 @@
 from pydantic.fields import Field
 
 
-from syringe.data import Prescription
+from lusyringe import Prescription
 
 health_openapi = [
     Prescription(
