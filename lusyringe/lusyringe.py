@@ -1,7 +1,7 @@
 from typing import List, Tuple, Type
 from pydantic import BaseModel as __BaseModel__
 
-from .checkers import TypeChecker
+
 from .checkers import DefinitionChecker
 
 from .data import Prescription
@@ -27,7 +27,9 @@ class __Meta__(type):
         else:
             __Meta__.__apply_loose_attrs(
                 self.__doc_fields,
-                attributes
+                attributes,
+                bases,
+                class_name
             )
 
         return type(
@@ -46,48 +48,77 @@ class __Meta__(type):
         type_annotations[prescription.field] = prescription.type
         attributes[prescription.field] = prescription.doc
 
-    def __apply_loose_attrs(prescriptions: List[Prescription], attributes: dict):
+    def __apply_loose_attrs(prescriptions: List[Prescription], attributes: dict, bases: Tuple[Type], class_name: str):
         for prescription in prescriptions:
-            annotation_exists = TypeChecker.exists_annotation(
-                attributes,
-                prescription.field
-            )
-
-            has_same_type = TypeChecker.attr_has_same_type(
+            attribute_check_result = DefinitionChecker.defined_in_attributes(
                 attributes,
                 prescription.field,
                 prescription.type
             )
 
-            if annotation_exists and not has_same_type:
+            if attribute_check_result.is_defined and not attribute_check_result.has_same_type:
                 raise LuSyringeError.illegal_type_attribution(
+                    class_name,
                     prescription.field,
-                    prescription.type
+                    prescription.type,
+                    attribute_check_result.existent_type
+                )
+
+            base_check_result = DefinitionChecker.defined_in_bases(
+                prescription.field,
+                prescription.type,
+                bases
+            )
+
+            if base_check_result.is_defined and not base_check_result.has_same_type:
+                raise LuSyringeError.illegal_type_attribution(
+                    class_name,
+                    prescription.field,
+                    prescription.type,
+                    base_check_result.existent_type
                 )
 
             __Meta__.__inject__(attributes, prescription)
 
     def __apply_strict_attrs(prescriptions: List[Prescription], attributes: dict, bases: Tuple[Type], class_name: str):
         for prescription in prescriptions:
-            defined_in_attributes = DefinitionChecker.defined_in_attributes(
+            attribute_check_result = DefinitionChecker.defined_in_attributes(
                 attributes,
                 prescription.field,
                 prescription.type
             )
 
-            defined_in_bases = DefinitionChecker.defined_in_bases(
+            if attribute_check_result.is_defined:
+                if attribute_check_result.has_same_type:
+                    __Meta__.__inject__(attributes, prescription)
+
+                    return
+                else:
+                    raise LuSyringeError.illegal_type_attribution(
+                        class_name,
+                        prescription.field,
+                        prescription.type,
+                        attribute_check_result.existent_type
+                    )
+
+            base_check_result = DefinitionChecker.defined_in_bases(
                 prescription.field,
                 prescription.type,
                 bases
             )
 
-            field_not_implemented = not defined_in_attributes and not defined_in_bases
-
-            if field_not_implemented:
+            if not base_check_result.is_defined:
                 raise LuSyringeError.attribute_not_implemented(
                     class_name,
                     prescription.field,
                     prescription.type
+                )
+            elif not base_check_result.has_same_type:
+                raise LuSyringeError.illegal_type_attribution(
+                    class_name,
+                    prescription.field,
+                    prescription.type,
+                    base_check_result.existent_type
                 )
 
             __Meta__.__inject__(attributes, prescription)
